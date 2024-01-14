@@ -23,6 +23,10 @@ func newRouter() *mux.Router {
 	// match all routes in path prefix instead of absolute route itself
 	r.PathPrefix("/assets/").Handler(staticFileHandler).Methods("GET")
 
+	// add handlers for bird routes
+	r.HandleFunc("/bird", getBirdHandler).Methods("GET")
+	r.HandleFunc("/bird", createBirdHandler).Methods("POST")
+
 	return r
 }
 
