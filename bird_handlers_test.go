@@ -11,10 +11,12 @@ import (
 )
 
 func TestGetBirdsHandler(t *testing.T) {
-	// create mock bird objects array
-	birds = []Bird{
-		{"sparrow", "A small harmless bird"},
-	}
+	// initialize mock store
+	mockStore := InitMockStore()
+
+	// define mock data
+	mockStore.On("GetBirds").Return([]*Bird{{"sparrow", "A small harmless bird"}}, nil).Once()
+
 	// setup new get request and test recorder
 	req, err := http.NewRequest("GET", "", nil)
 
@@ -46,12 +48,16 @@ func TestGetBirdsHandler(t *testing.T) {
 	if actual != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v", actual, expected)
 	}
+
+	// assert expectations defined in the On method above.
+	mockStore.AssertExpectations(t)
 }
 func TestCreateBirdsHandler(t *testing.T) {
+	// initialize mock store
+	mockStore := InitMockStore()
 
-	birds = []Bird{
-		{"sparrow", "A small harmless bird"},
-	}
+	// define mock data
+	mockStore.On("CreateBird", &Bird{"eagle", "A bird of prey"}).Return(nil)
 
 	form := newCreateBirdForm()
 	req, err := http.NewRequest("POST", "", bytes.NewBufferString(form.Encode()))
@@ -72,17 +78,8 @@ func TestCreateBirdsHandler(t *testing.T) {
 			status, http.StatusOK)
 	}
 
-	expected := Bird{"eagle", "A bird of prey"}
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	actual := birds[1]
-
-	if actual != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v", actual, expected)
-	}
+	// assert expectations defined in the On method above.
+	mockStore.AssertExpectations(t)
 }
 
 func newCreateBirdForm() *url.Values {

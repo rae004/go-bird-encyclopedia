@@ -1,10 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 )
 
 func newRouter() *mux.Router {
@@ -31,11 +33,31 @@ func newRouter() *mux.Router {
 }
 
 func main() {
+	fmt.Println("Starting Server...")
+
+	// open database connection
+	connString := "dbname=bird_encyclopedia sslmode=disable"
+	db, err := sql.Open("postgres", connString)
+
+	if err != nil {
+		panic(err)
+	}
+	err = db.Ping()
+
+	if err != nil {
+		panic(err)
+	}
+
+	// initialize store var for use throughout application
+	InitStore(&dbStore{db: db})
+
 	// get router
 	r := newRouter()
 
 	// pass router to http and listen on 8080
-	http.ListenAndServe(":8080", r)
+	port := 8080
+	http.ListenAndServe(fmt.Sprintf(":%d", port), r)
+	fmt.Println("Server listening on port:", port)
 }
 
 // "handler" is our handler function. It has to follow the function signature of a ResponseWriter and Request type
